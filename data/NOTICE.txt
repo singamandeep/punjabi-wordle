@@ -1,0 +1,29 @@
+Word list attribution
+=====================
+
+The playable Punjabi lexicon in data/words.js is compiled only from
+open-source corpora. No proprietary or all-rights-reserved dictionary
+was downloaded or copied.
+
+1. Punjabi Wikipedia article titles
+   Source: https://dumps.wikimedia.org/pawiki/latest/pawiki-latest-all-titles-in-ns0.gz
+   License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+   https://creativecommons.org/licenses/by-sa/4.0/
+
+2. Punjabi Wiktionary article titles
+   Source: https://dumps.wikimedia.org/pawiktionary/latest/pawiktionary-latest-all-titles-in-ns0.gz
+   License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+   https://creativecommons.org/licenses/by-sa/4.0/
+
+3. LibreOffice Punjabi Hunspell dictionary (pa_IN.dic)
+   Source: https://github.com/LibreOffice/dictionaries (pa_IN/pa_IN.dic)
+   License: Mozilla Public License 2.0 (MPL-2.0)
+   https://mozilla.org/MPL/2.0/
+
+The original game code (HTML, CSS, JavaScript, Python build script) is
+MIT-licensed; see LICENSE in the project root.
+
+Because the bundled word list includes CC BY-SA 4.0 material, anyone who
+distributes a modified word list must keep attribution and share that
+data under CC BY-SA 4.0 (or a compatible license). Hunspell-derived
+entries remain under MPL-2.0.
