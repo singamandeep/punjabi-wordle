@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pa">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1b1024" />
+    <title>ਸ਼ਬਦ — ਪੰਜਾਬੀ ਸ਼ਬਦ ਖੇਡ</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <button class="icon-btn" id="help-btn" type="button" aria-label="ਕਿਵੇਂ ਖੇਡਣਾ ਹੈ">?</button>
+        <div class="brand">
+          <h1>ਸ਼ਬਦ</h1>
+          <p>ਪੰਜਾਬੀ ਸ਼ਬਦ ਅੰਦਾਜ਼ਾ</p>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-btn" type="button" aria-label="ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ" aria-expanded="false">◐</button>
+          <button class="icon-btn" id="length-btn" type="button" aria-label="ਸ਼ਬਦ ਦੀ ਲੰਬਾਈ ਬਦਲੋ">ਲੰ.</button>
+          <div class="theme-menu hidden" id="theme-menu"></div>
+        </div>
+      </header>
+
+      <main class="board-wrap">
+        <p class="status" id="status" role="status"></p>
+        <div class="board" id="board" aria-label="ਖੇਡ ਬੋਰਡ"></div>
+        <div class="board-actions">
+          <button class="hint-btn hidden" id="hint-btn" type="button">ਸੰਕੇਤ</button>
+          <button class="giveup-btn hidden" id="giveup-btn" type="button">
+            ਸ਼ਬਦ ਵਿਖਾਓ ਤੇ ਖੇਡ ਖਤਮ
+          </button>
+        </div>
+      </main>
+
+      <section class="keyboard" id="keyboard" aria-label="ਗੁਰਮੁਖੀ ਕੀਬੋਰਡ"></section>
+      <p class="credit-banner">
+        ਵਰਡਲ ਤੋਂ ਪ੍ਰੇਰਿਤ, ਕਲੌਡ ਰਾਹੀਂ ਬਣਾਈ ਗਈ, ਪਿਆਰ ਨਾਲ ਅਮਨਦੀਪ ਸਿੰਘ ਵੱਲੋਂ।
+      </p>
+    </div>
+
+    <div class="modal hidden" id="setup-modal" role="dialog" aria-labelledby="setup-title">
+      <div class="modal-card">
+        <button class="close-btn" id="setup-close" type="button" aria-label="ਬੰਦ ਕਰੋ" hidden>×</button>
+        <h2 id="setup-title">ਸ਼ਬਦ ਦੀ ਲੰਬਾਈ ਚੁਣੋ</h2>
+        <p class="modal-copy">
+          ਹਰ ਟਾਈਲ ਇੱਕ ਪੂਰਾ ਅੱਖਰ ਹੈ — ਵਿਅੰਜਨ ਅਤੇ ਉਸਦੀ ਮਾਤਰਾ ਇੱਕੋ ਥਾਂ ਤੇ (ਜਿਵੇਂ ਗ, ਫਿਰ ੁ ਨਾਲ ਗੁ)। ਫਿਰ ਲੁਕਿਆ ਹੋਇਆ ਸ਼ਬਦ ਛੇ ਵਾਰੀ ਵਿੱਚ ਲੱਭੋ।
+        </p>
+        <div class="length-grid" id="length-grid"></div>
+        <div class="theme-field">
+          <p>ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ</p>
+          <div class="theme-dots" id="setup-themes"></div>
+        </div>
+        <p class="license-note">
+          ਸ਼ਬਦ-ਸੂਚੀ ਖੁੱਲ੍ਹੇ ਸਰੋਤਾਂ ਤੋਂ ਹੈ: ਵਿਕੀਪੀਡੀਆ / ਵਿਕਸ਼ਨਰੀ (CC BY-SA 4.0) ਅਤੇ LibreOffice Hunspell (MPL-2.0)।
+        </p>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="help-modal" role="dialog" aria-labelledby="help-title">
+      <div class="modal-card">
+        <button class="close-btn" id="help-close" type="button" aria-label="ਬੰਦ ਕਰੋ">×</button>
+        <h2 id="help-title">ਕਿਵੇਂ ਖੇਡਣਾ ਹੈ</h2>
+        <ul class="help-list">
+          <li>ਹੇਠਾਂ ਪੂਰੇ ਗੁਰਮੁਖੀ ਕੀਬੋਰਡ ਨਾਲ ਅੱਖਰ ਭਰੋ। ਮਾਤਰਾ ਉਸੇ ਟਾਈਲ ਵਿੱਚ ਜੁੜਦੀ ਹੈ (ਗ + ੁ = ਗੁ)।</li>
+          <li>ਪੂਰੀ ਕਤਾਰ ਭਰ ਕੇ <strong>ਠੀਕ</strong> ਦਬਾਓ।</li>
+          <li>ਰੰਗ ਦੱਸਦੇ ਹਨ ਕਿ ਅੱਖਰ ਸਹੀ ਥਾਂ ਤੇ ਹੈ, ਸ਼ਬਦ ਵਿੱਚ ਹੈ, ਜਾਂ ਨਹੀਂ ਹੈ।</li>
+          <li>ਛੇ ਅੰਦਾਜ਼ਿਆਂ ਤੱਕ ਖੇਡਦੇ ਰਹੋ। ਜਿੱਤ ਜਾਂ ਹਾਰ ਤੋਂ ਬਾਅਦ ਨਵਾਂ ਸ਼ਬਦ ਆ ਜਾਂਦਾ ਹੈ।</li>
+          <li>ਜੇ ਇੱਕ ਅੱਖਰ ਦੀ ਥਾਂ ਵੇਖਣੀ ਹੋਵੇ ਤਾਂ <strong>ਸੰਕੇਤ</strong> ਦਬਾਓ — ਇੱਕ ਵਾਰੀ ਵਿੱਚ ਇੱਕ ਥਾਂ, ਵੱਧ ਤੋਂ ਵੱਧ n−1 ਅੱਖਰ।</li>
+          <li>ਜੇ ਸ਼ਬਦ ਵੇਖਣਾ ਅਤੇ ਖੇਡ ਖਤਮ ਕਰਨੀ ਹੋਵੇ ਤਾਂ <strong>ਸ਼ਬਦ ਵਿਖਾਓ ਤੇ ਖੇਡ ਖਤਮ</strong> ਦਬਾਓ।</li>
+          <li>ਸਿਰੇ ਤੇ ◐ ਨਾਲ ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ ਬਦਲੋ (ਜਾਮਨੀ ਤੋਂ ਇਲਾਵਾ ਹੋਰ ਰੰਗ ਵੀ)।</li>
+        </ul>
+        <div class="swatches">
+          <div><span class="tile mini correct">ਗੁ</span> ਸਹੀ ਅੱਖਰ, ਸਹੀ ਥਾਂ</div>
+          <div><span class="tile mini present">ਪਾ</span> ਸ਼ਬਦ ਵਿੱਚ ਹੈ, ਗਲਤ ਥਾਂ</div>
+          <div><span class="tile mini hinted">ਮ</span> ਸੰਕੇਤ — ਸਹੀ ਥਾਂ ਖੁੱਲ੍ਹੀ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal hidden" id="end-modal" role="dialog" aria-labelledby="end-title">
+      <div class="modal-card">
+        <h2 id="end-title"></h2>
+        <p class="answer-line" id="end-answer"></p>
+        <div class="end-actions">
+          <button class="primary-btn" id="again-btn" type="button">ਅਗਲੀ ਖੇਡ</button>
+          <button class="ghost-btn" id="change-len-btn" type="button">ਲੰਬਾਈ ਬਦਲੋ</button>
+        </div>
+        <p class="credit-banner modal-credit">
+          ਵਰਡਲ ਤੋਂ ਪ੍ਰੇਰਿਤ, ਕਲੌਡ ਰਾਹੀਂ ਬਣਾਈ ਗਈ, ਪਿਆਰ ਨਾਲ ਅਮਨਦੀਪ ਸਿੰਘ ਵੱਲੋਂ।
+        </p>
+      </div>
+    </div>
+
+    <script src="data/words.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
