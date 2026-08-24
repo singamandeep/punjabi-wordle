@@ -1,0 +1,38 @@
+{
+  "sources": {
+    "pawiki_titles": 51082,
+    "pawiktionary_titles": 13253,
+    "libreoffice_hunspell": 2045,
+    "merged_unique": 61502
+  },
+  "playable_by_length": {
+    "2": {
+      "guesses": 9185,
+      "answers": 3043
+    },
+    "3": {
+      "guesses": 21146,
+      "answers": 5456
+    },
+    "4": {
+      "guesses": 17431,
+      "answers": 3878
+    },
+    "5": {
+      "guesses": 8847,
+      "answers": 1621
+    },
+    "6": {
+      "guesses": 3250,
+      "answers": 479
+    }
+  },
+  "playable_total": {
+    "guesses": 59859,
+    "answers": 14477
+  },
+  "licenses": [
+    "CC BY-SA 4.0 (Punjabi Wikipedia and Punjabi Wiktionary titles)",
+    "MPL-2.0 (LibreOffice pa_IN Hunspell dictionary)"
+  ]
+}
