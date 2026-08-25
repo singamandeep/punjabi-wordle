@@ -207,6 +207,36 @@ body {
   font-size: 0.95rem;
 }
 
+.score-line {
+  margin: 0;
+  color: var(--accent-deep);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.score-card {
+  margin: 12px 0 0;
+  padding: 12px 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg-elev) 70%, transparent);
+}
+
+.score-card .round-score {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--mustard);
+}
+
+.score-card .total-score,
+.score-card .score-break {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 .giveup-btn {
   margin-top: 4px;
   border: 1px solid var(--accent-deep);
@@ -431,17 +461,111 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+  margin-top: 4px;
+}
+
+.setup-step {
+  display: none !important;
+}
+
+.setup-step.is-active {
+  display: block !important;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mode-btn {
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 16px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+}
+
+.mode-btn strong {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--mustard);
+  margin-bottom: 6px;
+}
+
+.mode-btn span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.setup-nav {
+  display: flex;
+  gap: 8px;
   margin-top: 14px;
 }
 
-.theme-field {
-  margin-top: 16px;
+.setup-section {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 
-.theme-field p {
+.setup-section h3 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.setup-section p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.sync-label {
+  display: block;
   margin: 0 0 8px;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+#sync-seed {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-elev);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 10px 12px;
+}
+
+#sync-seed::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.sync-hint {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+#sync-error:empty {
+  display: none;
+}
+
+#sync-error:not(:empty) {
+  color: var(--present);
 }
 
 .theme-dots {
@@ -563,12 +687,6 @@ body {
   font-size: 0.78rem;
   line-height: 1.45;
   letter-spacing: 0.01em;
-}
-
-.modal-credit {
-  margin: 16px 0 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
 }
 
 .shake {
