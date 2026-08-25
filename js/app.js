@@ -21,6 +21,10 @@
 
   const RANK = { correct: 3, present: 2, absent: 1 };
   const THEME_KEY = "shabad-bg-theme";
+  const SCORE_KEY = "shabad-total-score";
+  const POINTS_PER_LETTER = 25;
+  const PENALTY_PER_EXTRA_GUESS = 5;
+  const PENALTY_PER_HINT = 5;
   const THEMES = [
     { id: "purple", label: "ਜਾਮਨੀ", swatch: "#6b3d8c", meta: "#1b1024" },
     { id: "green", label: "ਹਰਾ", swatch: "#2f8f62", meta: "#102418" },
@@ -41,6 +45,10 @@
     lengthGrid: document.getElementById("length-grid"),
     endTitle: document.getElementById("end-title"),
     endAnswer: document.getElementById("end-answer"),
+    endScore: document.getElementById("end-score"),
+    scoreLine: document.getElementById("score-line"),
+    setupTitle: document.getElementById("setup-title"),
+    setupCopy: document.getElementById("setup-copy"),
   };
 
   const state = {
@@ -55,6 +63,13 @@
     hinted: [],
     wasPlaying: false,
     setupFromEnd: false,
+    setupMode: "single",
+    setupStep: "mode",
+    setupEntryStep: "mode",
+    modeLocked: false,
+    syncSeed: "",
+    syncIndex: 0,
+    syncLength: null,
   };
 
   const lists = {};
@@ -192,6 +207,65 @@
   }
 
   let forcedWord = new URLSearchParams(location.search).get("word");
+  const sequenceCache = {};
+
+  function normalizeSeed(raw) {
+    return String(raw || "").normalize("NFC").trim();
+  }
+
+  function hashSeed(str) {
+    let hash = 2166136261;
+    for (const ch of str) {
+      hash ^= ch.codePointAt(0);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function mulberry32(seed) {
+    return function () {
+      seed |= 0;
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function shuffledAnswers(list, seed, length) {
+    const rng = mulberry32(hashSeed(`${seed}|${length}`));
+    const arr = list.slice();
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(rng() * (i + 1));
+      const swap = arr[i];
+      arr[i] = arr[j];
+      arr[j] = swap;
+    }
+    return arr;
+  }
+
+  function syncSequence(length) {
+    const key = `${state.syncSeed}|${length}`;
+    if (!sequenceCache[key]) {
+      sequenceCache[key] = shuffledAnswers(bankFor(length, "answers"), state.syncSeed, length);
+    }
+    return sequenceCache[key];
+  }
+
+  function readSyncSeed() {
+    const input = document.getElementById("sync-seed");
+    return normalizeSeed(input ? input.value : "");
+  }
+
+  function applySyncSettings(length) {
+    const seed = state.setupMode === "multi" ? readSyncSeed() : "";
+    const size = Number(length);
+    if (seed !== state.syncSeed || size !== state.syncLength) {
+      state.syncSeed = seed;
+      state.syncLength = seed ? size : null;
+      state.syncIndex = 0;
+    }
+  }
 
   function pickAnswer(length) {
     const list = bankFor(length, "answers");
@@ -200,6 +274,11 @@
       const word = forcedWord;
       forcedWord = null;
       return word;
+    }
+    if (state.syncSeed) {
+      const sequence = syncSequence(length);
+      if (!sequence.length) return "";
+      return sequence[state.syncIndex % sequence.length];
     }
     return list[Math.floor(Math.random() * list.length)];
   }
@@ -377,6 +456,33 @@
     finish("gaveup");
   }
 
+  function loadTotalScore() {
+    const value = Number(localStorage.getItem(SCORE_KEY));
+    return Number.isFinite(value) && value >= 0 ? value : 0;
+  }
+
+  function saveTotalScore(value) {
+    localStorage.setItem(SCORE_KEY, String(value));
+  }
+
+  function renderTotalScore() {
+    const total = loadTotalScore();
+    if (els.scoreLine) {
+      els.scoreLine.textContent = `ਕੁੱਲ ਅੰਕ: ${total.toLocaleString("pa-Guru")}`;
+    }
+  }
+
+  function roundScore(result) {
+    if (result !== "win") return 0;
+    const base = POINTS_PER_LETTER * state.length;
+    const extraGuesses = Math.max(0, state.guesses.length - 1);
+    const hints = state.hinted.length;
+    return Math.max(
+      0,
+      base - PENALTY_PER_EXTRA_GUESS * extraGuesses - PENALTY_PER_HINT * hints
+    );
+  }
+
   function finish(result) {
     state.playing = false;
     setPlayActionsVisible(false);
@@ -385,9 +491,29 @@
       lose: "ਅਗਲੀ ਵਾਰੀ!",
       gaveup: "ਖੇਡ ਖਤਮ",
     };
+    const earned = roundScore(result);
+    let total = loadTotalScore();
+    if (earned > 0) {
+      total += earned;
+      saveTotalScore(total);
+    }
+    renderTotalScore();
+
     els.endTitle.textContent = titles[result] || titles.lose;
     els.endAnswer.textContent = `ਸ਼ਬਦ ਸੀ: ${state.answer}`;
+    const extraGuesses = Math.max(0, state.guesses.length - 1);
+    const hints = state.hinted.length;
+    const base = POINTS_PER_LETTER * state.length;
+    const breakLine =
+      result === "win"
+        ? `ਅਧਾਰ ${base} · ਵਾਧੂ ਕੋਸ਼ਿਸ਼ −${PENALTY_PER_EXTRA_GUESS * extraGuesses} · ਸੰਕੇਤ −${PENALTY_PER_HINT * hints}`
+        : "ਸ਼ਬਦ ਨਾ ਲੱਭਣ ਤੇ ਇਸ ਖੇਡ ਦੇ ਅੰਕ 0 ਰਹਿੰਦੇ ਹਨ";
+    els.endScore.innerHTML =
+      `<p class="round-score">ਇਸ ਖੇਡ: ${earned.toLocaleString("pa-Guru")}</p>` +
+      `<p class="score-break">${breakLine}</p>` +
+      `<p class="total-score">ਕੁੱਲ ਅੰਕ: ${total.toLocaleString("pa-Guru")}</p>`;
     els.end.classList.remove("hidden");
+    if (state.syncSeed) state.syncIndex += 1;
   }
 
   function onKey(key) {
@@ -435,6 +561,7 @@
       return;
     }
     state.length = Number(length);
+    applySyncSettings(length);
     state.allowed = new Set(list);
     state.answer = pickAnswer(length);
     state.guesses = [];
@@ -443,10 +570,19 @@
     state.keyColors = {};
     state.playing = true;
     state.gaveUp = false;
+    state.modeLocked = true;
     els.setup.classList.add("hidden");
     els.end.classList.add("hidden");
     setPlayActionsVisible(true);
-    setStatus(`${state.length} ਅੱਖਰ · ${list.length.toLocaleString("pa-Guru")} ਸ਼ਬਦ`);
+    const syncLabel = state.syncSeed
+      ? `ਸਾਂਝੀ · ਕ੍ਰਮ ${state.syncIndex + 1}`
+      : "";
+    setStatus(
+      [syncLabel, `${state.length} ਅੱਖਰ`, `${list.length.toLocaleString("pa-Guru")} ਸ਼ਬਦ`]
+        .filter(Boolean)
+        .join(" · ")
+    );
+    renderTotalScore();
     renderBoard();
     renderKeyboard();
   }
@@ -465,18 +601,79 @@
   }
 
   function gameHasStarted() {
-    return Boolean(state.answer);
+    return state.modeLocked || Boolean(state.answer);
   }
 
-  function showSetup() {
+  function setupOptions(value) {
+    if (!value || typeof value !== "object") return {};
+    if ("startStep" in value) return value;
+    if ("target" in value && "type" in value) return {};
+    return value;
+  }
+
+  function goSetupStep(step) {
+    const allowed = new Set(["mode", "seed", "length"]);
+    if (state.modeLocked && step === "mode") step = "length";
+    if (!allowed.has(step)) step = state.modeLocked ? "length" : "mode";
+    state.setupStep = step;
+    if (els.setup) els.setup.dataset.phase = step;
+    ["mode", "seed", "length"].forEach((name) => {
+      const el = document.getElementById(`step-${name}`);
+      if (!el) return;
+      const on = name === step;
+      el.hidden = !on;
+      el.classList.toggle("is-active", on);
+    });
+    const copy = {
+      mode: {
+        title: "ਖੇਡ ਚੁਣੋ",
+        text: "ਪਹਿਲਾਂ ਚੁਣੋ: ਇਕੱਲੇ ਖੇਡਣਾ ਹੈ ਜਾਂ ਦੋਸਤਾਂ ਨਾਲ ਇੱਕੋ ਸ਼ਬਦ-ਕ੍ਰਮ ਤੇ।",
+      },
+      seed: {
+        title: "ਸਾਂਝੀ ਕੁੰਜੀ",
+        text: "ਇੱਕੋ ਲਿਖਤ ਸਾਰੇ ਖਿਡਾਰੀ ਲਿਖਣ। ਇਸ ਤੋਂ ਉਹੀ ਸ਼ਬਦ ਉਸੇ ਕ੍ਰਮ ਵਿੱਚ ਮਿਲਣਗੇ।",
+      },
+      length: {
+        title: "ਸ਼ਬਦ ਦੀ ਲੰਬਾਈ ਚੁਣੋ",
+        text:
+          state.setupMode === "multi"
+            ? "ਹੁਣ ਲੰਬਾਈ ਚੁਣੋ। ਸਾਰੇ ਖਿਡਾਰੀ ਇਹੀ ਲੰਬਾਈ ਰੱਖਣ।"
+            : "ਹਰ ਟਾਈਲ ਇੱਕ ਪੂਰਾ ਅੱਖਰ ਹੈ (ਜਿਵੇਂ ਗ + ੁ = ਗੁ)। ਲੰਬਾਈ ਚੁਣ ਕੇ ਖੇਡ ਸ਼ੁਰੂ ਕਰੋ।",
+      },
+    };
+    const page = copy[step] || copy.mode;
+    els.setupTitle.textContent = page.title;
+    els.setupCopy.textContent = page.text;
+    const err = document.getElementById("sync-error");
+    if (err) err.textContent = "";
+    if (step === "seed") {
+      const input = document.getElementById("sync-seed");
+      if (input) input.focus();
+    }
+  }
+
+  function showSetup(options) {
+    const opts = setupOptions(options);
     state.wasPlaying = state.playing;
     state.setupFromEnd = !els.end.classList.contains("hidden");
-    state.playing = false;
-    setPlayActionsVisible(false);
+    if (state.playing) {
+      state.playing = false;
+      setPlayActionsVisible(false);
+    }
     els.end.classList.add("hidden");
     els.setup.classList.remove("hidden");
     document.getElementById("setup-close").hidden = !gameHasStarted();
+    let startStep = opts.startStep || (state.modeLocked ? "length" : "mode");
+    if (state.modeLocked && startStep === "mode") startStep = "length";
+    const themeSection = document.getElementById("setup-themes-section");
+    if (themeSection) themeSection.hidden = state.modeLocked || startStep === "length";
     renderLengthChoices();
+    state.setupEntryStep = startStep;
+    goSetupStep(startStep);
+  }
+
+  function showLengthSetup() {
+    showSetup({ startStep: "length" });
   }
 
   function dismissSetup() {
@@ -502,9 +699,48 @@
   els.setup.addEventListener("click", (event) => {
     if (event.target === els.setup) dismissSetup();
   });
-  document.getElementById("length-btn").addEventListener("click", showSetup);
+  document.getElementById("length-btn").addEventListener("click", () => {
+    if (state.modeLocked) showLengthSetup();
+    else showSetup({ startStep: "mode" });
+  });
+  document.getElementById("mode-single").addEventListener("click", () => {
+    state.setupMode = "single";
+    goSetupStep("length");
+  });
+  document.getElementById("mode-multi").addEventListener("click", () => {
+    state.setupMode = "multi";
+    goSetupStep("seed");
+  });
+  document.getElementById("seed-back").addEventListener("click", () => goSetupStep("mode"));
+  document.getElementById("length-back").addEventListener("click", () => {
+    if (state.modeLocked || state.setupEntryStep === "length") {
+      dismissSetup();
+      return;
+    }
+    goSetupStep(state.setupMode === "multi" ? "seed" : "mode");
+  });
+  document.getElementById("seed-next").addEventListener("click", () => {
+    const seed = readSyncSeed();
+    const err = document.getElementById("sync-error");
+    if (!seed) {
+      if (err) err.textContent = "ਸਾਂਝੀ ਖੇਡ ਲਈ ਕੁੰਜੀ ਲਿਖੋ।";
+      return;
+    }
+    if (err) err.textContent = "";
+    goSetupStep("length");
+  });
+  document.getElementById("sync-seed").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.getElementById("seed-next").click();
+    }
+  });
   document.getElementById("again-btn").addEventListener("click", () => startGame(state.length));
-  document.getElementById("change-len-btn").addEventListener("click", showSetup);
+  document.getElementById("change-len-btn").addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showLengthSetup();
+  });
   document.getElementById("giveup-btn").addEventListener("click", giveUp);
   document.getElementById("hint-btn").addEventListener("click", revealHint);
 
@@ -580,6 +816,7 @@
   });
 
   applyTheme(currentThemeId());
+  renderTotalScore();
   renderLengthChoices();
   showSetup();
 })();
