@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1b1024" />
     <title>ਸ਼ਬਦ — ਪੰਜਾਬੀ ਸ਼ਬਦ ਖੇਡ</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/styles.css?v=20260825f" />
   </head>
   <body>
     <div class="app">
@@ -24,6 +24,7 @@
 
       <main class="board-wrap">
         <p class="status" id="status" role="status"></p>
+        <p class="score-line" id="score-line"></p>
         <div class="board" id="board" aria-label="ਖੇਡ ਬੋਰਡ"></div>
         <div class="board-actions">
           <button class="hint-btn hidden" id="hint-btn" type="button">ਸੰਕੇਤ</button>
@@ -34,21 +35,63 @@
       </main>
 
       <section class="keyboard" id="keyboard" aria-label="ਗੁਰਮੁਖੀ ਕੀਬੋਰਡ"></section>
-      <p class="credit-banner">
+      <footer class="credit-banner">
         ਵਰਡਲ ਤੋਂ ਪ੍ਰੇਰਿਤ, ਕਲੌਡ ਰਾਹੀਂ ਬਣਾਈ ਗਈ, ਪਿਆਰ ਨਾਲ ਅਮਨਦੀਪ ਸਿੰਘ ਵੱਲੋਂ।
-      </p>
+      </footer>
     </div>
 
     <div class="modal hidden" id="setup-modal" role="dialog" aria-labelledby="setup-title">
       <div class="modal-card">
         <button class="close-btn" id="setup-close" type="button" aria-label="ਬੰਦ ਕਰੋ" hidden>×</button>
-        <h2 id="setup-title">ਸ਼ਬਦ ਦੀ ਲੰਬਾਈ ਚੁਣੋ</h2>
-        <p class="modal-copy">
-          ਹਰ ਟਾਈਲ ਇੱਕ ਪੂਰਾ ਅੱਖਰ ਹੈ — ਵਿਅੰਜਨ ਅਤੇ ਉਸਦੀ ਮਾਤਰਾ ਇੱਕੋ ਥਾਂ ਤੇ (ਜਿਵੇਂ ਗ, ਫਿਰ ੁ ਨਾਲ ਗੁ)। ਫਿਰ ਲੁਕਿਆ ਹੋਇਆ ਸ਼ਬਦ ਛੇ ਵਾਰੀ ਵਿੱਚ ਲੱਭੋ।
+        <h2 id="setup-title">ਖੇਡ ਚੁਣੋ</h2>
+        <p class="modal-copy" id="setup-copy">
+          ਪਹਿਲਾਂ ਚੁਣੋ: ਇਕੱਲੇ ਖੇਡਣਾ ਹੈ ਜਾਂ ਦੋਸਤਾਂ ਨਾਲ ਇੱਕੋ ਸ਼ਬਦ-ਕ੍ਰਮ ਤੇ।
         </p>
-        <div class="length-grid" id="length-grid"></div>
-        <div class="theme-field">
-          <p>ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ</p>
+
+        <div class="setup-step is-active" id="step-mode" data-step="mode">
+          <div class="mode-grid">
+            <button class="mode-btn" id="mode-single" type="button">
+              <strong>ਇਕੱਲੀ ਖੇਡ</strong>
+              <span>ਸ਼ਬਦ ਰਲਵੇਂ ਮਿਲਣਗੇ</span>
+            </button>
+            <button class="mode-btn" id="mode-multi" type="button">
+              <strong>ਸਾਂਝੀ ਖੇਡ</strong>
+              <span>ਇੱਕੋ ਕੁੰਜੀ, ਇੱਕੋ ਕ੍ਰਮ</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="setup-step" id="step-seed" data-step="seed" hidden>
+          <label class="sync-label" for="sync-seed">ਸਾਂਝੀ ਕੁੰਜੀ</label>
+          <input
+            id="sync-seed"
+            type="text"
+            maxlength="80"
+            spellcheck="false"
+            autocomplete="off"
+            placeholder="ਜਿਵੇਂ ਪੰਜਾਬ-2026"
+            aria-label="ਸਾਂਝੀ ਖੇਡ ਦੀ ਕੁੰਜੀ"
+          />
+          <p class="sync-hint" id="sync-error"></p>
+          <p class="sync-hint">
+            ਸਾਰੇ ਖਿਡਾਰੀ ਇਹੀ ਕੁੰਜੀ ਲਿਖਣ। ਇਸ ਤੋਂ ਬਾਅਦ ਲੰਬਾਈ ਚੁਣੋਗੇ।
+          </p>
+          <div class="setup-nav">
+            <button class="ghost-btn" id="seed-back" type="button">ਪਿੱਛੇ</button>
+            <button class="primary-btn" id="seed-next" type="button">ਅੱਗੇ</button>
+          </div>
+        </div>
+
+        <div class="setup-step" id="step-length" data-step="length" hidden>
+          <div class="length-grid" id="length-grid"></div>
+          <div class="setup-nav">
+            <button class="ghost-btn" id="length-back" type="button">ਪਿੱਛੇ</button>
+          </div>
+        </div>
+
+        <div class="setup-section" id="setup-themes-section">
+          <h3>ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ</h3>
+          <p>ਖੇਡ ਦੀ ਥੀਮ ਚੁਣੋ — ਇਹ ਚੋਣ ਲੰਬਾਈ ਤੋਂ ਵੱਖਰੀ ਹੈ।</p>
           <div class="theme-dots" id="setup-themes"></div>
         </div>
         <p class="license-note">
@@ -69,6 +112,8 @@
           <li>ਜੇ ਇੱਕ ਅੱਖਰ ਦੀ ਥਾਂ ਵੇਖਣੀ ਹੋਵੇ ਤਾਂ <strong>ਸੰਕੇਤ</strong> ਦਬਾਓ — ਇੱਕ ਵਾਰੀ ਵਿੱਚ ਇੱਕ ਥਾਂ, ਵੱਧ ਤੋਂ ਵੱਧ n−1 ਅੱਖਰ।</li>
           <li>ਜੇ ਸ਼ਬਦ ਵੇਖਣਾ ਅਤੇ ਖੇਡ ਖਤਮ ਕਰਨੀ ਹੋਵੇ ਤਾਂ <strong>ਸ਼ਬਦ ਵਿਖਾਓ ਤੇ ਖੇਡ ਖਤਮ</strong> ਦਬਾਓ।</li>
           <li>ਸਿਰੇ ਤੇ ◐ ਨਾਲ ਬੈਕਗ੍ਰਾਊਂਡ ਰੰਗ ਬਦਲੋ (ਜਾਮਨੀ ਤੋਂ ਇਲਾਵਾ ਹੋਰ ਰੰਗ ਵੀ)।</li>
+          <li>ਜਿੱਤ ਤੇ ਅੰਕ: 25 × ਅੱਖਰਾਂ ਦੀ ਗਿਣਤੀ, ਹਰ ਅਗਲੀ ਕੋਸ਼ਿਸ਼ ਤੇ −5, ਹਰ ਸੰਕੇਤ ਤੇ −5। ਹਾਰ ਜਾਂ ਖੇਡ ਖਤਮ ਤੇ 0।</li>
+          <li>ਸਾਂਝੀ ਖੇਡ: ਇੱਕੋ ਕੁੰਜੀ ਅਤੇ ਲੰਬਾਈ ਲਿਖੋ — ਹਰ ਖਿਡਾਰੀ ਨੂੰ ਉਹੀ ਸ਼ਬਦ ਉਸੇ ਕ੍ਰਮ ਵਿੱਚ ਮਿਲਣਗੇ।</li>
         </ul>
         <div class="swatches">
           <div><span class="tile mini correct">ਗੁ</span> ਸਹੀ ਅੱਖਰ, ਸਹੀ ਥਾਂ</div>
@@ -82,17 +127,15 @@
       <div class="modal-card">
         <h2 id="end-title"></h2>
         <p class="answer-line" id="end-answer"></p>
+        <div class="score-card" id="end-score"></div>
         <div class="end-actions">
           <button class="primary-btn" id="again-btn" type="button">ਅਗਲੀ ਖੇਡ</button>
           <button class="ghost-btn" id="change-len-btn" type="button">ਲੰਬਾਈ ਬਦਲੋ</button>
         </div>
-        <p class="credit-banner modal-credit">
-          ਵਰਡਲ ਤੋਂ ਪ੍ਰੇਰਿਤ, ਕਲੌਡ ਰਾਹੀਂ ਬਣਾਈ ਗਈ, ਪਿਆਰ ਨਾਲ ਅਮਨਦੀਪ ਸਿੰਘ ਵੱਲੋਂ।
-        </p>
       </div>
     </div>
 
     <script src="data/words.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=20260825f"></script>
   </body>
 </html>
